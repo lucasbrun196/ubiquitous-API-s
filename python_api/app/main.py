@@ -8,7 +8,6 @@ from .utils import (
     hash_password,
     user_to_dict,
     verify_email,
-    verify_hash_password,
     verify_password,
 )
 
@@ -79,42 +78,36 @@ def get_user(user_id: str, db: Session = Depends(database.get_db)):
         return error_response(500, "internal-server-error", "Internal Server Error")
 
 
-#can update any user data and dont need give his password (can change new password, username, name, email etc)
-# @app.put("/users/{user_id}")
-# def update_user(user_id: str, payload: dict = Body(default_factory=dict), db: Session = Depends(database.get_db)):
-#     try:
-#         try:
-#             parsed_id = int(user_id)
-#         except ValueError:
-#             return JSONResponse(status_code=422, content={"data": {"status": 422, "code": "unprocessable-entity", "messgae": "User id must be a number"}})
+@app.put("/users/{user_id}")
+def update_user(user_id: str, payload: dict = Body(default_factory=dict), db: Session = Depends(database.get_db)):
+    try:
+        try:
+            parsed_id = int(user_id)
+        except ValueError:
+            return JSONResponse(status_code=422, content={"data": {"status": 422, "code": "unprocessable-entity", "messgae": "User id must be a number"}})
 
-#         params = UserPayload(payload, user_id=parsed_id)
-#         existing = crud.get_user(db, parsed_id)
-#         if existing is None:
-#             return error_response(404, "user-not-found", "User not found")
+        params = UserPayload(payload, user_id=parsed_id)
+        existing = crud.get_user(db, parsed_id)
+        if existing is None:
+            return error_response(404, "user-not-found", "User not found")
 
-#         if not verify_email(params.email):
-#             return error_response(400, "invalid-email", "Invalid email format")
-#         if not verify_password(params.password):
-#             return error_response(400, "invalid-password", "Invalid password format. It must contains characters, number and at least 6 digits")
-#         if len(params.user) <= 0:
-#             return error_response(400, "invalid-user", "Invalid user name. This field cannot be empty")
+        if not verify_email(params.email):
+            return error_response(400, "invalid-email", "Invalid email format")
+        if not verify_password(params.password):
+            return error_response(400, "invalid-password", "Invalid password format. It must contains characters, number and at least 6 digits")
+        if len(params.user) <= 0:
+            return error_response(400, "invalid-user", "Invalid user name. This field cannot be empty")
 
-#         current_pwd = crud.get_password(db, parsed_id)
-#         is_user_in_use = crud.username_exists(db, params.user, exclude_id=existing.id)
-#         is_valid_pwd = verify_hash_password(params.current_password, current_pwd)
-#         new_pwd = hash_password(params.password or "")
+        is_user_in_use = crud.username_exists(db, params.user, exclude_id=existing.id)
+        new_pwd = hash_password(params.password or "")
 
-#         if not is_valid_pwd:
-#             return JSONResponse(status_code=403, content={"data": {"status": 401, "code": "unauthorized", "message": "Unauthorized, wrong password"}})
-#         if is_user_in_use:
-#             return error_response(409, "existing-user", "This user name is in use")
+        if is_user_in_use:
+            return error_response(409, "existing-user", "This user name is in use")
 
-#         crud.update_user(db, existing, name=params.name, email=params.email, username=params.user, password_hash=new_pwd)
-#         return JSONResponse(status_code=200, content={"message": "User updated with successfully"})
-#     except Exception:
-#         return error_response(500, "internal-server-error", "Internal Server Error")
-
+        crud.update_user(db, existing, name=params.name, email=params.email, username=params.user, password_hash=new_pwd)
+        return JSONResponse(status_code=200, content={"message": "User updated with successfully"})
+    except Exception:
+        return error_response(500, "internal-server-error", "Internal Server Error")
 
 
 @app.delete("/users/{user_id}")
@@ -133,6 +126,7 @@ def delete_user(user_id: str, db: Session = Depends(database.get_db)):
         return JSONResponse(status_code=200, content={"message": "User deleted with successfully"})
     except Exception:
         return error_response(500, "internal-server-error", "Internal Server Error")
+
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=3002, reload=True)
