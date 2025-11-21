@@ -2,19 +2,19 @@ package usecase
 
 import (
 	"go_api/model"
-	getusersrepository "go_api/repository"
+	"go_api/repository"
 )
 
-type GetUsersUsecase struct {
-	repository getusersrepository.GetUsersRepository
+type GetUserUsecase struct {
+	repository repository.GetUserRepository
 }
 
-func NewGetUsersUsecaseInstance(repository getusersrepository.GetUsersRepository) GetUsersUsecase {
-	return GetUsersUsecase{
+func NewGetUserUsecase(repository repository.GetUserRepository) GetUserUsecase {
+	return GetUserUsecase{
 		repository: repository,
 	}
 }
 
-func (g *GetUsersUsecase) Call() []model.Users {
-	return g.repository.Call()
+func (g *GetUserUsecase) Call(id *int) model.Users {
+	return g.repository.Call(id)
 }

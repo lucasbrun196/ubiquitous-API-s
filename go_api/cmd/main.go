@@ -10,6 +10,7 @@ import (
 )
 
 func init() {
+	initializers.LoadEnviroments()
 	initializers.ConnectDb()
 }
 
@@ -18,10 +19,30 @@ func main() {
 	server := gin.Default()
 
 	GetUsersRepository := repository.NewGetUsersRepository()
-	GetUsersUsecase := usecase.NewGetUsersUsecaseInstance(GetUsersRepository)
-	GetUsersController := controller.NewGetUserControllerInstance(GetUsersUsecase)
+	GetUsersUsecase := usecase.NewGetUsersUsecase(GetUsersRepository)
+	GetUsersController := controller.NewGetUsersController(GetUsersUsecase)
+
+	GetUserRepository := repository.NewGetUserRepository()
+	GetUserUsecase := usecase.NewGetUserUsecase(GetUserRepository)
+	GetUserController := controller.NewGetUserController(GetUserUsecase)
+
+	PostUserRepository := repository.NewPostUsersRepository()
+	PostUserUsecase := usecase.NewPostUserUsecase(PostUserRepository)
+	PostUserController := controller.NewPostUsersController(PostUserUsecase)
+
+	UpdateUserRepository := repository.NewUpdateUserRepository()
+	UpdateUserUsecase := usecase.NewUpdateUserUsecase(UpdateUserRepository)
+	UpdateUserController := controller.NewUpdateUserController(UpdateUserUsecase)
+
+	DeleteUserRepository := repository.NewDeleteUserRepository()
+	DeleteUserUsecase := usecase.NewDeleteUserUsecase(DeleteUserRepository)
+	DeleteUserController := controller.NewDeleteUserController(DeleteUserUsecase)
 
 	server.GET("/users", GetUsersController.Call)
+	server.GET("/users/:id", GetUserController.Call)
+	server.POST("/users", PostUserController.Call)
+	server.PUT("/users/:id", UpdateUserController.Call)
+	server.DELETE("/users/:id", DeleteUserController.Call)
 
-	server.Run(":3001")
+	server.Run(":" + initializers.Port)
 }

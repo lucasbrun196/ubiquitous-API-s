@@ -11,7 +11,7 @@ type getUsersController struct {
 	usecase getusersusecase.GetUsersUsecase
 }
 
-func NewGetUserControllerInstance(usecase getusersusecase.GetUsersUsecase) getUsersController {
+func NewGetUsersController(usecase getusersusecase.GetUsersUsecase) getUsersController {
 	return getUsersController{
 		usecase: usecase,
 	}
